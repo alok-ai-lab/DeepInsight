@@ -1,8 +1,6 @@
-## Welcome to GitHub Pages
+# DeepInsight
 
-You can use the [editor on GitHub](https://github.com/alok-ai-lab/DeepInsight/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+This repository contains the original MatLab code for DeepInsight as described in the paper [DeepInsight: A methodology to transform a non-image data to an image for convolution neural network architecture](https://doi.org/10.1038/s41598-019-47765-6), as well as a python implementation for some features.
 
 ### Markdown
 
