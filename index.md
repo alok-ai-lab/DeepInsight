@@ -62,7 +62,7 @@ plt.figure(figsize=(5, 5))
 it.fit(X_train_norm, plot=True)
 ```
 
-![png](./data/output_8_0.png)
+![png](DeepInsight/data/output_8_0.png)
 
 The feature density matrix can be extracted from the trained transformer in order to view overall feature overlap.
 
