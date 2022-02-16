@@ -1,0 +1,82 @@
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+Net: resnet50
+ObjFcnMeasure: accuracy
+Stage: 1; Test Accuracy: 0.1163; ValErro: 0.5000; 
+Momentum: 0; L2Regularization: 8.12689e-08; InitLearnRate: 0.00432246
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+Net: resnet50
+ObjFcnMeasure: accuracy
+Stage: 1; Test Accuracy: 0.5116; ValErro: 0.1250; 
+Momentum: 0.801033; L2Regularization: 0.0125157; InitLearnRate: 4.98661e-05
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+Net: resnet50
+ObjFcnMeasure: accuracy
+Stage: 1; Test Accuracy: 0.6375; ValErro: 0.2319; 
+Momentum: 0.801033; L2Regularization: 0.0125157; InitLearnRate: 4.98661e-05
+
+Run1
+SnowFall: 0
+Method: tsne
+Distance: hamming
+Use Previous Model: n
+Stage 1 Begins
+Input Size 1 x Input Size 2 x Input Size 3: 224 x 224 x 1
+Dataset: PDX_Paclitaxel
+Net: resnet50
+ObjFcnMeasure: accuracy
+Stage: 1; Test Accuracy: 0.9625; ValErro: 0.0580; 
+Momentum: 0.801033; L2Regularization: 0.0125157; InitLearnRate: 4.98661e-05

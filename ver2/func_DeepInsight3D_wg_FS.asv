@@ -1,0 +1,325 @@
+function [AUC,AUCnet,C,Accuracy,ValErr] = func_DeepInsight3D_wg_FS(DSETnum)
+%weighted nets eg resnet and efficientnetb0 are in the weighted form to
+%find classification accuracy and/or auc
+close all;
+
+Parm.Method = ['tsne'];%tsne'];%['tSNE']; % 1) tSNE 2) kpca or 3) pca 4) umap
+Parm.Dist = 'hamming';%'hamming';%'hamming';%hamming';%'hamming'; % For tSNE only 1) mahalanobis 2) cosine 3) euclidean 4) chebychev 5) correlation 6) hamming (default: cosine)
+Parm.Max_Px_Size = 224;%224;%224;% 227; %inf; 227 for SqueezeNet, 224 EfficientNetB0 (however, not necessary to change)
+Parm.MPS_Fix=1;
+%Parm.MPS_Fix = 1; % if this val is 1 then screen will be 
+                  % Max_Px_Size x Max_Px_Size (e.g. 227x227), otherwise 
+                  % automatically decided by the distribution of the input data.
+                  
+Parm.ValidRatio = 0.1; % ratio of validation data/Training data
+Parm.Seed = 108; % random seed to distribute training and validation sets
+Parm.Norm = 2; % Select '1' for Norm-1, '2' for Norm-2 and '0' for automatically select the best Norm (either 1 or 2).
+Parm.FileRun = 'Run7';
+Parm.SnowFall = 0;%1; % Put 1 if you want to use SnowFall compression algorithm
+Parm.Threshold = 0.6; %CAM threshold [0,1]
+Parm.DesiredGenes = 1200;%1200; % number of expected features to be selected
+Parm.UsePrevModel = 'n'; % 'y' for yes and 'n' for no (for CNN). For 'y' the hyperparameter of previous stages will be used.
+Parm.SaveModels = 'y'; % 'y' for saving models or 'n' for not saving
+Parm.Stage=1; % '1', '2', '3', '4', '5' depending upon which stage of DeepInsight-FS to run.
+Parm.ObjFcnMeasure = 'accuracy';%'accuracy' or 'other' % select objective function valError (accuracy or other (for other measures eg sensitiity, specificity, auc etc)
+Parm.MaxObj = 1; % maximum objective functions for Bayesian Optimization Technique
+Parm.MaxEpochs = 2;%100;
+Parm.MaxTime = 50; % (in hours) Max. training time in hours to run a model.  
+Parm.NetName = 'resnet50';%'resnet50';%'resnet50';%'inceptionresnetv2';%'inceptionresnetv2';%'resnet50';%'inceptionresnetv2';%'resnet50';%'nasnetlarge';%'inceptionresnetv2';%'nasnetlarge';%resnet50';%alexnet;% efficientnetb0;%efficientnetb0;%squeezenet;%'efficientnetb0';%'squeezenet'; 'googlenet'; 'efficientnetb0';
+Parm.net = eval(Parm.NetName);%resnet50;%alexnet;% efficientnetb0;%efficientnetb0;%squeezenet;%'efficientnetb0';%'squeezenet'; 'googlenet'; 'efficientnetb0';
+Parm.miniBatchSize = 256;
+Parm.Augment = 1;%1; % '1' toaugment training data, otherwise set it '0'
+Parm.ApplyFS = 0; %if '1' then apply Feature Selection using logreg otherwise '0'
+Parm.FeatureMap = 1; % if '0' means use 'All' omics data for Cart2Pixel;
+                     % if '1' means use 'EXP' omics data only
+                     % if '2' means use 'MET' omics data only
+                     % if '3' means use 'MUT' omics data only
+Parm.TransLearn = 0; % learn from previous datasets '1' for yes
+
+
+%Define where you want to store the model and FIGS, and path of Data
+%(default settings are given here)
+curr_dir=pwd;
+FIGS_path = [curr_dir,'/FIGS/'];
+Models_path = [curr_dir,'/Models/'];
+Data_path = '~/data/MoliData/MoliMatData_artem_v2/';%[curr_dir,'/Data/'];
+Parm.PATH{1} =  FIGS_path; %'~/Dropbox/Public/FIGS/DeepInsight_CAM_FS/'; %Store figures in this folder
+Parm.PATH{2} = Models_path; %'~/MatWorks/Unsup/DeepInsight-FS_pkg/Models/'; % Store model in this folder
+Parm.PATH{3} = Data_path; % store your data here
+
+if Parm.TransLearn==1
+    Parm.TLdir = 'Run32';
+    Parm.TLfile = [Models_path,Parm.TLdir,'/Stage1/model.mat'];
+    cd(Parm.TLfile(1:end-9)); 
+    Mod = load(Parm.TLfile);
+    ModF = load(Mod.fileName);
+    cd(curr_dir);
+    Parm.DAGnet = ModF.trainedNet;
+end
+
+% Dataset name
+%Parm.Dataname = 'Example3D.mat';%'dataset1.mat';
+Parm.Dataname = ['dataset',num2str(DSETnum),'aug.mat'];%'dataset4.mat';%'dataset3.mat';
+
+
+fid2 = fopen('DeepInsight3D_Results.txt','a+');
+fprintf(fid2,'\n');
+fprintf(fid2,'%s',Parm.FileRun);
+fprintf(fid2,'\n');
+fprintf(fid2,'SnowFall: %d\n',Parm.SnowFall);
+fprintf(fid2,'Method: %s\n',Parm.Method);
+if any(strcmp('Dist',fieldnames(Parm)))==1
+    fprintf(fid2,'Distance: %s\n',Parm.Dist);
+else
+    fprintf(fid2,'Distance is not applicable or Deafult\n');
+end
+fprintf(fid2,'Threshold: %6.2f\n',Parm.Threshold);
+fprintf(fid2,'Use Previous Model: %s\n',Parm.UsePrevModel);
+
+Glen=inf; 
+
+while (Glen > Parm.DesiredGenes) & (Parm.Stage < 7)
+    close all;
+    fprintf(fid2,'Stage %d Begins\n',Parm.Stage);
+    fprintf('Stage %d Begins\n',Parm.Stage);
+    display('Starting Data preparation by DeepInsight');
+    [InputSz1,InputSz2,InputSz3,Init_dim,SET] = func_Prepare_Data(Parm);
+    
+    fprintf('Input Size 1 x Input Size 2 x Input Size 3: %d x %d x %d\n',InputSz1,InputSz2,InputSz3);
+    fprintf(fid2,'Input Size 1 x Input Size 2 x Input Size 3: %d x %d x %d\n',InputSz1,InputSz2,InputSz3);
+    fprintf(fid2,'Dataset: %s\n',SET);
+    if Parm.Stage<=2
+        fprintf(fid2,'Initial Dimension: %d\n',Init_dim);
+    end
+    display('Data preparation ends');
+    fprintf('\n');
+
+display('Training model begins: Net1');
+[Accuracy1(Parm.Stage),ValErr1(Parm.Stage),Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage),AUC1(Parm.Stage),C1,prob1] = func_TrainModel(Parm);
+fprintf(fid2,'Net: %s\n',Parm.NetName);
+fprintf(fid2,'ObjFcnMeasure: %s\n',Parm.ObjFcnMeasure);
+fprintf('Stage: %d; Test Accuracy: %6.4f; ValErr: %4.4f; \n',Parm.Stage,Accuracy1(Parm.Stage),ValErr1(Parm.Stage));
+fprintf('Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'Stage: %d; Test Accuracy: %6.4f; ValErro: %4.4f; \n',Parm.Stage,Accuracy1(Parm.Stage),ValErr1(Parm.Stage));
+fprintf(fid2,'Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'AUC: %6.4f; \n',AUC1(Parm.Stage));
+fprintf('\nConfusion Matrix\n');
+fprintf(fid2,'[%d  %d]\n',C1(1,1),C1(1,2));
+fprintf(fid2,'[%d  %d]\n',C1(2,1),C1(2,2));
+fprintf('Net1 AUC: %6.4f; \n',AUC1(Parm.Stage));
+C1
+display('Training model ends');
+fprintf('\n');
+
+%feature selection
+Parm.g=0;
+display('Feature selection begins');
+[Genes,Genes_compressed,G]= func_FeatureSelection_CAM(Parm);
+G
+Glen=length(Genes);
+Glen_comp = length(Genes_compressed);
+fprintf('#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+fprintf(fid2,'#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+display('Feature selection ends');
+fprintf('Stage %d Ends\n',Parm.Stage);
+fprintf(fid2,'Stage %d Ends\n\n',Parm.Stage);
+
+
+%Parm.Dist = 'euclidean';
+Parm.NetName = 'efficientnetb0';%'resnet50';%'resnet50';%'inceptionresnetv2';%'inceptionresnetv2';%'resnet50';%'inceptionresnetv2';%'resnet50';%'nasnetlarge';%'inceptionresnetv2';%'nasnetlarge';%resnet50';%alexnet;% efficientnetb0;%efficientnetb0;%squeezenet;%'efficientnetb0';%'squeezenet'; 'googlenet'; 'efficientnetb0';
+Parm.net = eval(Parm.NetName);
+% [InputSz1,InputSz2,InputSz3,Init_dim,SET] = func_Prepare_Data(Parm);
+display('Training model begins: Net2');
+[Accuracy2(Parm.Stage),ValErr2(Parm.Stage),Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage),AUC2(Parm.Stage),C2,prob2] = func_TrainModel(Parm);
+fprintf(fid2,'Net: %s\n',Parm.NetName);
+fprintf(fid2,'ObjFcnMeasure: %s\n',Parm.ObjFcnMeasure);
+fprintf('Stage: %d; Test Accuracy: %6.4f; ValErr: %4.4f; \n',Parm.Stage,Accuracy2(Parm.Stage),ValErr2(Parm.Stage));
+fprintf('Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'Stage: %d; Test Accuracy: %6.4f; ValErro: %4.4f; \n',Parm.Stage,Accuracy2(Parm.Stage),ValErr2(Parm.Stage));
+fprintf(fid2,'Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'AUC: %6.4f; \n',AUC2(Parm.Stage));
+fprintf('\nConfusion Matrix\n');
+fprintf(fid2,'[%d  %d]\n',C2(1,1),C2(1,2));
+fprintf(fid2,'[%d  %d]\n',C2(2,1),C2(2,2));
+fprintf('Net2 AUC: %6.4f; \n',AUC2(Parm.Stage));
+C2
+display('Training model ends');
+fprintf('\n');
+
+%feature selection
+Parm.g=1;
+Parm.Genes=Genes;
+Parm.Genes_compressed=Genes_compressed;
+Parm.G=G;
+
+display('Feature selection begins');
+[Genes,Genes_compressed,G]= func_FeatureSelection_CAM(Parm);
+G
+Glen=length(Genes);
+Glen_comp = length(Genes_compressed);
+fprintf('#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+fprintf(fid2,'#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+display('Feature selection ends');
+fprintf('Stage %d Ends\n',Parm.Stage);
+fprintf(fid2,'Stage %d Ends\n\n',Parm.Stage);
+
+
+Parm.Dist = 'euclidean';
+Parm.NetName = 'resnet50';%'resnet50';%'resnet50';%'inceptionresnetv2';%'inceptionresnetv2';%'resnet50';%'inceptionresnetv2';%'resnet50';%'nasnetlarge';%'inceptionresnetv2';%'nasnetlarge';%resnet50';%alexnet;% efficientnetb0;%efficientnetb0;%squeezenet;%'efficientnetb0';%'squeezenet'; 'googlenet'; 'efficientnetb0';
+Parm.net = eval(Parm.NetName);
+%Parm.miniBatchSize = 128;
+[InputSz1,InputSz2,InputSz3,Init_dim,SET] = func_Prepare_Data(Parm);
+ 
+display('Training model begins: Net3');
+[Accuracy3(Parm.Stage),ValErr3(Parm.Stage),Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage),AUC3(Parm.Stage),C3,prob3] = func_TrainModel(Parm);
+fprintf(fid2,'Net: %s\n',Parm.NetName);
+fprintf(fid2,'ObjFcnMeasure: %s\n',Parm.ObjFcnMeasure);
+fprintf('Stage: %d; Test Accuracy: %6.4f; ValErr: %4.4f; \n',Parm.Stage,Accuracy3(Parm.Stage),ValErr3(Parm.Stage));
+fprintf('Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'Stage: %d; Test Accuracy: %6.4f; ValErro: %4.4f; \n',Parm.Stage,Accuracy3(Parm.Stage),ValErr3(Parm.Stage));
+fprintf(fid2,'Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+fprintf(fid2,'AUC: %6.4f; \n',AUC3(Parm.Stage));
+fprintf('\nConfusion Matrix\n');
+fprintf(fid2,'[%d  %d]\n',C3(1,1),C3(1,2));
+fprintf(fid2,'[%d  %d]\n',C3(2,1),C3(2,2));
+fprintf('Net3 AUC: %6.4f; \n',AUC3(Parm.Stage));
+C3
+display('Training model ends');
+fprintf('\n');
+
+%feature selection
+Parm.Genes=Genes;
+Parm.Genes_compressed=Genes_compressed;
+Parm.G=G;
+
+display('Feature selection begins');
+[Genes,Genes_compressed,G]= func_FeatureSelection_CAM(Parm);
+G
+Glen=length(Genes);
+Glen_comp = length(Genes_compressed);
+fprintf('#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+fprintf(fid2,'#Genes = %d; #Genes_compressed = %d\n',Glen,Glen_comp);
+display('Feature selection ends');
+fprintf('Stage %d Ends\n',Parm.Stage);
+fprintf(fid2,'Stage %d Ends\n\n',Parm.Stage);
+
+
+%Parm.Dist = 'euclidean';
+%Parm.NetName = 'efficientnetb0';%'resnet50';%'resnet50';%'inceptionresnetv2';%'inceptionresnetv2';%'resnet50';%'inceptionresnetv2';%'resnet50';%'nasnetlarge';%'inceptionresnetv2';%'nasnetlarge';%resnet50';%alexnet;% efficientnetb0;%efficientnetb0;%squeezenet;%'efficientnetb0';%'squeezenet'; 'googlenet'; 'efficientnetb0';
+%Parm.net = eval(Parm.NetName);
+%Parm.miniBatchSize = 128;
+%[InputSz1,InputSz2,InputSz3,Init_dim,SET] = func_Prepare_Data(Parm);
+ 
+% display('Training model begins: Net4');
+% [Accuracy4(Parm.Stage),ValErr4(Parm.Stage),Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage),AUC4(Parm.Stage),C4,prob4] = func_TrainModel(Parm);
+% fprintf(fid2,'Net: %s\n',Parm.NetName);
+% fprintf(fid2,'ObjFcnMeasure: %s\n',Parm.ObjFcnMeasure);
+% fprintf('Stage: %d; Test Accuracy: %6.4f; ValErr: %4.4f; \n',Parm.Stage,Accuracy4(Parm.Stage),ValErr4(Parm.Stage));
+% fprintf('Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+% fprintf(fid2,'Stage: %d; Test Accuracy: %6.4f; ValErro: %4.4f; \n',Parm.Stage,Accuracy4(Parm.Stage),ValErr4(Parm.Stage));
+% fprintf(fid2,'Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
+% fprintf(fid2,'AUC: %6.4f; \n',AUC4(Parm.Stage));
+% fprintf('\nConfusion Matrix\n');
+% fprintf(fid2,'[%d  %d]\n',C4(1,1),C4(1,2));
+% fprintf(fid2,'[%d  %d]\n',C4(2,1),C4(2,2));
+% fprintf('Net3 AUC: %6.4f; \n',AUC4(Parm.Stage));
+% C4
+% display('Training model ends');
+% fprintf('\n');
+
+ValErr.net1 = ValErr1;
+ValErr.net2 = ValErr2;
+if exist('ValErr3')==1
+    ValErr.net3 = ValErr3;
+else
+    ValErr.net3=[];
+end
+if exist('ValErr4')==1
+    ValErr.net4 = ValErr4;
+else
+    ValErr.net4=[];
+end
+
+AUCnet.net1 = AUC1;
+AUCnet.net2 = AUC2;
+if exist('AUC3')==1
+    AUCnet.net3 = AUC3;
+else
+    AUCnet.net3=[];
+end
+if exist('AUC4')==1
+    AUCnet.net4 = AUC4;
+else
+    AUCnet.net4=[];
+end
+
+if exist('ValErr4')==1
+    Xtr = [prob1.val,prob2.val,prob3.val,prob4.val];
+elseif exist('ValErr3')==1
+    Xtr = [prob1.val,prob2.val,prob3.val];
+%     Xtr_v = [prob1.val,prob2.val,prob3.val];
+%     Xtr_t = [prob1.train,prob2.train,prob3.train];
+%     Xtr = [Xtr_v;Xtr_t];
+%     clear Xtr_v Xtr_t;
+else
+    Xtr = [prob1.val,prob2.val];
+%     Xtr_v = [prob1.val,prob2.val];
+%     Xtr_t = [prob1.train,prob2.train];
+%     Xtr = [Xtr_v;Xtr_t];
+%     clear Xtr_v Xtr_t;
+end
+
+Ytr = [prob1.YValidation];%;prob1.YTrain];
+if exist('ValErr4')==1
+    Xts = [prob1.test,prob2.test,prob3.test,prob4.test];
+elseif exist('ValErr3')==1
+    Xts = [prob1.test,prob2.test,prob3.test];
+else
+    Xts = [prob1.test,prob2.test];
+end
+Yts = prob1.YTest;
+
+% Log reg ####
+% current_dir=pwd;
+% cd ~/MatWorks/Unsup/liblinear-2.11/matlab/
+% model=train(double(Ytr),sparse(double(Xtr)),['-s 0','liblinear_options',]);
+% [yhat,acc,Y]=predict(double(Yts),sparse(double(Xts)),model,['-b 1']);
+% C=confusionmat(Yts,categorical(round(yhat)));
+% Y=Y(:,2);
+% cd(current_dir);
+% ############
+
+% Lasso #####
+[B,FitInfo] = lasso(Xtr,double(Ytr),'Alpha',0.75,'CV',10);
+idx = FitInfo.Index1SE;
+coef = B(:,idx);
+coef0 = FitInfo.Intercept(idx);
+
+
+yhat = Xts*coef + coef0;
+C=confusionmat(Yts,categorical(round(yhat)));
+Y=(yhat-min(yhat))/(max(yhat)-min(yhat));
+% ###########
+
+% Avergae #############
+% clear Y yhat
+%  K=[mean(Xts(:,[1,3,5])')',mean(Xts(:,[2,4,6])')'];
+%  for j=1:size(K,1)
+%      [Y(j),yhat(j)]=max(K(j,:));
+%  end
+%  Y=Y';
+%  yhat=yhat';
+%  C=confusionmat(Yts,categorical(round(yhat)));
+ %#####################
+
+
+[a,b,c,AUC] = perfcurve(Yts,Y,'2');
+Accuracy=(C(1,1)+C(2,2))/sum(sum(C));
+
+Parm.Stage=Parm.Stage+1;
+end
+end
+
+
+% 
+
