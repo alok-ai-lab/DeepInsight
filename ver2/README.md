@@ -117,6 +117,13 @@ Save your new datasets in the above structure format and give name as ‘dataset
    … Test Accuracy: 0.9875; ValErr: 0.0145
    …….
 
+## B) Run without Bayesian Optimization Technique
+1. Open Parameters.m file and goto Line 21. Change Parm.MaxObj=1.
+
+2. Define hyperparamters, InitialLearnRate, Momentum and L2Regularization parameters (Line 31 - Line 33).
+
+3. Run Main.m. If you want to view training progress of CNN then go to makeObjFcn*.m file and change 'Plots','none' to 'Plots','training-progress'.
+
 ## Reference
 Sharma, A., Vans, E., Shigemizu, D. *et al.* DeepInsight: A methodology to transform a non-image data to an image for convolution neural network architecture. *Sci Rep* **9**, 11399 (2019). https://doi.org/10.1038/s41598-019-47765-6
 
