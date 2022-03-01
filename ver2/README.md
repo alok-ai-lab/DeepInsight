@@ -32,12 +32,19 @@ Setup a dataset and initial parameters
 1)	Check the example data structure in /DeepInsight_Ver2/Data/dataset1.mat. The structure of dataset1.mat is:
 
   Xtrain:		[13494 x 689 double]
+  
   num_tr:		[361 328]
+  
   Xtest:		 [13494 x 80 double]
+  
   num_tst:	[40 40]
+  
   class:		 2
+  
   dim:		   13494
+  
   Set:		   ‘PDX_Pcalitaxel’
+  
 
 ‘Xtrain’ is the training set where 13494 rows are the number of features or dimensions with 689 samples.
 
