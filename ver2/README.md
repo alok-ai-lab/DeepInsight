@@ -120,7 +120,7 @@ Save your new datasets in the above structure format and give name as ‘dataset
 ## B) Run without Bayesian Optimization Technique
 1. Open Parameters.m file and goto Line 21. Change Parm.MaxObj=1.
 
-2. Define hyperparamters, InitialLearnRate, Momentum and L2Regularization parameters (Line 31 - Line 33).
+2. Define hyperparamters: InitialLearnRate, Momentum and L2Regularization parameters (Line 31 - Line 33).
 
 3. Run Main.m. If you want to view training progress of CNN then go to makeObjFcn*.m file and change 'Plots','none' to 'Plots','training-progress'.
 
