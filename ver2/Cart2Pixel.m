@@ -97,7 +97,7 @@ clear Y DIST para
 % should have a nearly square bounding rectangle
 [xrect,yrect] = minboundrect(x,y);
 
-figure
+H1 = figure
 hold on;
 plot(xrect,yrect,'k-');
 plot(x,y,'o');
@@ -137,6 +137,11 @@ for p1 = 1:n
 end
 %Time=toc
 plot([z(1,min_p1),z(1,min_p2)],[z(2,min_p1),z(2,min_p2)],'k.');
+hold off;
+curr_dir=pwd;
+cd FIGS
+saveas(H1,'pixel_frame.jpg','jpg');
+cd(curr_dir);
 
 % Find distance between two nearest points
 dmin = norm(z(:,min_p1)-z(:,min_p2));
