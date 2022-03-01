@@ -83,6 +83,8 @@ Save your new datasets in the above structure format and give name as ‘dataset
    (in Ubuntu terminal)
    >> eog FIGS/pixel_frame.jpg 
 
+	<img src="https://github.com/alok-ai-lab/DeepInsight/blob/master/ver2/FIGS/pixel_frame.jpg" width="128"/>
+
 3.	The mapped data is saved as Out2.mat (since Norm ‘2’ was used, if Norm ‘1’ is used then output file would be Out1.mat).
 
 4.	To see the mapped tabular data on the pixel frame, load the output file.
