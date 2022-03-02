@@ -6,7 +6,7 @@ Download <i>DeepInsight_Ver2.tar.gz or DeepInsight_Ver2</i> folder.
 ## Whats added?
 1)	Ease of using DeepInsight with proper handling of parameters through the function Parameters.m
 
-2)	Several pretrained CNN nets can be used such as ResNet, GoogleNet, EfficientNetB0 etc. simply by changing the option Parm.NetName in the file DeepInsight.m. Custom made nets can be used by changing Parm.ParalleNet=1. At present parallel net used in the original DeepInsight work has been used. However, modify the functions ‘makeObjFcn2.m’ and ‘makeObjFc2_MaxObj1.m’ as per your new design.
+2)	Several pretrained CNN nets can be used such as ResNet, GoogleNet, EfficientNetB0 etc. simply by changing the option Parm.NetName in the file DeepInsight.m. Custom made nets can be used by changing Parm.ParalleNet=1. At present, 'parallel net' is used as reported in the original DeepInsight work. However, modify the functions ‘makeObjFcn2.m’ and ‘makeObjFc2_MaxObj1.m’ as per your new design.
 
 3)	Use of Bayesian optimization technique (BOT) to tune hyperparameters can be made by changing Parm.MaxObj. If Parm.MaxObj=1 then NO BOT will be used; i.e., CNN net will be trained by using predefined hyperparameters in Parameters.m file.
 
@@ -55,7 +55,7 @@ Setup a dataset and initial parameters
 
 <i>‘Xtest’</i> is the test set. Here, 80 samples are used.
 
-<i>‘num_tst’</i> is the number of samples per class. Here first 40 samples belong to ‘class 1’ and next ‘40’ samples belong to ‘class 2’.
+<i>‘num_tst’</i> is the number of test samples per class. Here first 40 samples belong to ‘class 1’ and next ‘40’ samples belong to ‘class 2’.
 
 <i>‘class’</i> is the number of classes of the dataset. Here it is 2.
 
