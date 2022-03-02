@@ -73,7 +73,7 @@ Save your new datasets in the above structure format and give name as ‘dataset
 
 6)	Line 58 of Parameters.m defines the strategy of feature mapping. Default is Parm.FeatureMap=1; i.e., if 3 layers of data is used (e.g. expression, methylation, and mutation) then the first layer (expression) of data will be used to find pixel coordinates. If you want all the layers to contribute equally in finding the pixel coordinates then use Parm.FeatureMap=0. However, in this example, only 1 layer is available so this parameter will not be used.
 
-7)	Line 62 of Parameters.m defines transfer learning. If you want to use your pretrained DAGnet to train the new model then use Parm.TransLearn=1 and save your DAGnet, named as ‘model.mat’ file, in the folder "/DeepInsight_Ver2/Models/Run32/Stage1/". Alternatively, modify Lines 76-84 to suit your model. For this example, run transfer learning option has not been used.
+7)	Line 62 of Parameters.m defines transfer learning. If you want to use your pretrained DAGnet to train the new model then use Parm.TransLearn=1 and save your DAGnet, named as ‘model.mat’ file, in the folder "/DeepInsight_Ver2/Models/Run32/Stage1/". Alternatively, modify Lines 76-84 to suit your model. For this example, 'transfer learning' option has not been used.
 
 8)	Default Norm is ‘2’ (please see DeepInsight paper for details). Other parameters are given and illustrated in Parameters.m file. However, please change as required.
 
