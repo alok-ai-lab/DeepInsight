@@ -85,5 +85,8 @@ else
 end
 L2Reg = f.options.L2Regularization;
 InitLR = f.options.InitialLearnRate;
+if isempty(AUC)==1
+    AUC=nan;
+end
 
 
