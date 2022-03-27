@@ -43,4 +43,9 @@ fprintf(fid2,'Stage: %d; Test Accuracy: %6.4f; ValErr: %4.4f; \n',Parm.Stage,Acc
 fprintf(fid2,'Momentum: %g; L2Regularization: %g; InitLearnRate: %g\n',Momentum(Parm.Stage),L2Reg(Parm.Stage),InitLR(Parm.Stage));
 display('Training model ends');
 fprintf('\n');
+
+% save models
+if strcmp(lower(Parm.SaveModels),'y')==1
+    func_SaveModels(Parm);
+end
 end
