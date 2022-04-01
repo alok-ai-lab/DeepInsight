@@ -169,8 +169,8 @@ if Parm.Norm==0
     if Parm.Augment==1
         Out1.orgYTrain = Out1.YTrain;
         Out1.orgYValidation = Out1.YValidation;
-        [Out1.XTrain,Out1.YTrain] = augmentDeepInsight(Out1.XTrain,Out1.YTrain);
-        [Out1.XValidation,Out1.YValidation] = augmentDeepInsight(Out1.XValidation,Out1.YValidation);
+        [Out1.XTrain,Out1.YTrain] = augmentDeepInsight(Out1.XTrain,Out1.YTrain,Parm.aug_tr);
+        [Out1.XValidation,Out1.YValidation] = augmentDeepInsight(Out1.XValidation,Out1.YValidation,Parm.aug_val);
     end
     A = Out1.A;
     B = Out1.B;
@@ -184,8 +184,8 @@ if Parm.Norm==0
     if Parm.Augment==1
         Out2.orgYTrain = Out2.YTrain;
         Out2.orgYValidation = Out2.YValidation;
-        [Out2.XTrain,Out2.YTrain] = augmentDeepInsight(Out2.XTrain,Out2.YTrain);
-        [Out2.XValidation,Out2.YValidation] = augmentDeepInsight(Out2.XValidation,Out2.YValidation);
+        [Out2.XTrain,Out2.YTrain] = augmentDeepInsight(Out2.XTrain,Out2.YTrain,Parm.aug_tr);
+        [Out2.XValidation,Out2.YValidation] = augmentDeepInsight(Out2.XValidation,Out2.YValidation,Parm.aug_val);
     end
     A = Out2.A;
     B = Out2.B;
@@ -199,8 +199,8 @@ elseif Parm.Norm==1
     if Parm.Augment==1
         Out1.orgYTrain = Out1.YTrain;
         Out1.orgYValidation = Out1.YValidation;
-        [Out1.XTrain,Out1.YTrain] = augmentDeepInsight(Out1.XTrain,Out1.YTrain);
-        [Out1.XValidation,Out1.YValidation] = augmentDeepInsight(Out1.XValidation,Out1.YValidation);
+        [Out1.XTrain,Out1.YTrain] = augmentDeepInsight(Out1.XTrain,Out1.YTrain,Parm.aug_tr);
+        [Out1.XValidation,Out1.YValidation] = augmentDeepInsight(Out1.XValidation,Out1.YValidation,Parm.aug_val);
     end
     A = Out1.A;
     B = Out1.B;
@@ -214,8 +214,8 @@ elseif Parm.Norm==2
     if Parm.Augment==1
         Out2.orgYTrain = Out2.YTrain;
         Out2.orgYValidation = Out2.YValidation;
-        [Out2.XTrain,Out2.YTrain] = augmentDeepInsight(Out2.XTrain,Out2.YTrain);
-        [Out2.XValidation,Out2.YValidation] = augmentDeepInsight(Out2.XValidation,Out2.YValidation);
+        [Out2.XTrain,Out2.YTrain] = augmentDeepInsight(Out2.XTrain,Out2.YTrain,Parm.aug_tr);
+        [Out2.XValidation,Out2.YValidation] = augmentDeepInsight(Out2.XValidation,Out2.YValidation,Parm.aug_val);
     end
     A = Out2.A;
     B = Out2.B;
