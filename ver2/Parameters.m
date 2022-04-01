@@ -54,6 +54,8 @@ Parm.MaxTime = 50; % (in hours) Max. training time in hours to run a model.
 
 Parm.miniBatchSize = 256;
 Parm.Augment = 0;%1; % '1' toaugment training data, otherwise set it '0'
+Parm.aug_tr = 500; %For training set: if a class has less than Parm.aug_tr number of samples then maximum of these many samples to be added
+Parm.aug_val = 50; % same as Parm.aug_tr but for the validation set
 Parm.ApplyFS = 0; %if '1' then apply Feature Selection using logreg otherwise '0'
 Parm.FeatureMap = 1; % if '0' means use 'All' omics data for Cart2Pixel;
                      % if '1' means use 'EXP' omics data only
