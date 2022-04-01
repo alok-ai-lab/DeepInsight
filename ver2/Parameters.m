@@ -74,7 +74,7 @@ Parm.PATH{1} =  FIGS_path; %'~/Dropbox/Public/FIGS/DeepInsight_CAM_FS/'; %Store 
 Parm.PATH{2} = Models_path; %'~/MatWorks/Unsup/DeepInsight-FS_pkg/Models/'; % Store model in this folder
 Parm.PATH{3} = Data_path; % store your data here
 
-% modify as per the local and path of your saved DAGnet
+% modify as per the path of your saved DAGnet
 if Parm.TransLearn==1
     Parm.TLdir = 'Run32';
     Parm.TLfile = [Models_path,Parm.TLdir,'/Stage1/model.mat'];
