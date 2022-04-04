@@ -16,9 +16,9 @@ This repository contains the original MatLab code for DeepInsight as described i
 
 # MatLab Code
 
-Version 1: original package as described in the paper: https://github.com/alok-ai-lab/DeepInsight/tree/master/ver1
+Version 1: original package as described in the paper: [https://github.com/alok-ai-lab/DeepInsight/tree/master/ver1](https://github.com/alok-ai-lab/DeepInsight/tree/master/ver1)
 
-Version 2: updated package: https://github.com/alok-ai-lab/DeepInsight/tree/master/ver2
+Version 2: updated package: [https://github.com/alok-ai-lab/DeepInsight/tree/master/ver2](https://github.com/alok-ai-lab/DeepInsight/tree/master/ver2)
 
 
 # pyDeepInsight
