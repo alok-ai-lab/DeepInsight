@@ -11,9 +11,12 @@ function [Out,Norm]  = DeepInsight_train_CAM(Parm,Norm)
 if nargin<2
 
 dset = load('Out1.mat');
-if size(dset.XTrain,3)<3
+if size(dset.XTrain,3)==1
     dset.XTrain = cat(3,dset.XTrain,dset.XTrain,dset.XTrain);
-    dset.XValidation = cat(3,dset.XValidation,dset.XValidation,dset.XValidation)
+    dset.XValidation = cat(3,dset.XValidation,dset.XValidation,dset.XValidation);
+elseif size(dset.XTrain,3)==2
+    dset.XTrain = cat(3,dset.XTrain(:,:,1,:),dset.XTrain(:,:,2,:),dset.XTrain(:,:,1,:));
+    dset.XValidation = cat(3,dset.XValidation(:,:,1,:),dset.XValidation(:,:,2,:),dset.XValidation(:,:,1,:));
 end
 
 Out1 = DeepInsight_train_norm_CAM(dset.XTrain,dset.YTrain,dset.XValidation,dset.YValidation,Parm);
@@ -21,9 +24,12 @@ fprintf('\nNorm-1 valError %2.4f\n',Out1.valError);
 fprintf(Parm.fid,'\nNorm-1 valError %2.4f\n',Out1.valError);
 
 dset = load('Out2.mat');
-if size(dset.XTrain,3)<3
+if size(dset.XTrain,3)==1
     dset.XTrain = cat(3,dset.XTrain,dset.XTrain,dset.XTrain);
     dset.XValidation = cat(3,dset.XValidation,dset.XValidation,dset.XValidation);
+elseif size(dset.XTrain,3)==2
+    dset.XTrain = cat(3,dset.XTrain(:,:,1,:),dset.XTrain(:,:,2,:),dset.XTrain(:,:,1,:));
+    dset.XValidation = cat(3,dset.XValidation(:,:,1,:),dset.XValidation(:,:,2,:),dset.XValidation(:,:,1,:));
 end
 
 Out2 = DeepInsight_train_norm_CAM(dset.XTrain,dset.YTrain,dset.XValidation,dset.YValidation,Parm);
