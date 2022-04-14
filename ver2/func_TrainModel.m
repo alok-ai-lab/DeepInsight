@@ -43,10 +43,14 @@ if Norm==1
 else
     Data = load('Out2.mat');
 end
-if size(Data.XTrain,3)<3
+if size(Data.XTrain,3)==1
     Data.XTest = cat(3,Data.XTest,Data.XTest,Data.XTest);
     Data.XValidation = cat(3,Data.XValidation,Data.XValidation,Data.XValidation);
+elseif size(Data,XTrain,3)==2
+    Data.XTest = cat(3,Data.XTest(:,:,1,:),Data.XTest(:,:,2,:),Data.XTest(:,:,1,:));
+    Data.XValidation = cat(3,Data.XValidation(:,:,1,:),Data.XValidation(:,:,2,:),Data.XValidation(:,:,1,:));
 end
+
 Data = rmfield(Data,'XTrain');
 Data = rmfield(Data,'YTrain');
 %Data = rmfield(Data,'XValidation');
