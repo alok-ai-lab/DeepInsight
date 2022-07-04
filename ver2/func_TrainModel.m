@@ -43,22 +43,38 @@ if Norm==1
 else
     Data = load('Out2.mat');
 end
-if size(Data.XTrain,3)==1
-    Data.XTest = cat(3,Data.XTest,Data.XTest,Data.XTest);
-    Data.XValidation = cat(3,Data.XValidation,Data.XValidation,Data.XValidation);
-elseif size(Data,XTrain,3)==2
-    Data.XTest = cat(3,Data.XTest(:,:,1,:),Data.XTest(:,:,2,:),Data.XTest(:,:,1,:));
-    Data.XValidation = cat(3,Data.XValidation(:,:,1,:),Data.XValidation(:,:,2,:),Data.XValidation(:,:,1,:));
+
+if isfield(Data,'XTest')==0
+    Test_Empty=1;
+else
+    if isempty(Data.XTest)==1
+        Test_Empty=1;
+    else
+        Test_Empty=0;
+    end
 end
 
+if size(Data.XTrain,3)==1
+    if Test_Empty==0
+    Data.XTest = cat(3,Data.XTest,Data.XTest,Data.XTest);
+    end
+    Data.XValidation = cat(3,Data.XValidation,Data.XValidation,Data.XValidation);
+elseif size(Data.XTrain,3)==2
+    if Test_Empty==0
+    Data.XTest = cat(3,Data.XTest(:,:,1,:),Data.XTest(:,:,2,:),Data.XTest(:,:,1,:));
+    end
+    Data.XValidation = cat(3,Data.XValidation(:,:,1,:),Data.XValidation(:,:,2,:),Data.XValidation(:,:,1,:));
+end
 Data = rmfield(Data,'XTrain');
 Data = rmfield(Data,'YTrain');
 %Data = rmfield(Data,'XValidation');
 %Data = rmfield(Data,'YValidation');
 
+if Test_Empty==0
 [Accuracy,AUC,C,prob_test] = DeepInsight_test_CAM(Data,model);
 prb.test=prob_test;
 prb.YTest=Data.YTest;
+end
 % NOTE: AUC is for two class problem only, otherwise its value would be 'NaN
 
 %find validation probabilities
@@ -67,6 +83,13 @@ Data.YTest = Data.YValidation;
 [Accuracy_val,AUC_val,C_val,prob_val] = DeepInsight_test_CAM(Data,model);
 prb.val=prob_val;
 prb.YValidation=Data.YValidation;
+if Test_Empty==1
+    fprintf('\nNOTE: Test set is NOT available!\n');
+    fprintf('Performance measures are for Validation SET\n');
+    Accuracy=Accuracy_val;
+    AUC=AUC_val;
+    C=C_val;
+end
 
 % %find train probabilities
 % Data.XTest = Data.XTrain;
